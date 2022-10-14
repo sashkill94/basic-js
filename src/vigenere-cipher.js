@@ -19,15 +19,56 @@ const { NotImplementedError } = require('../extensions/index.js');
  * reverseMachine.decrypt('AEIHQX SX DLLU!', 'alphonse') => '!NWAD TA KCATTA'
  * 
  */
-class VigenereCipheringMachine {
-  encrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
-  }
-  decrypt() {
-    throw new NotImplementedError('Not implemented');
-    // remove line with error and write your code here
-  }
+ class VigenereCipheringMachine {
+
+    direct = true;
+
+    constructor(isdirect = true) {
+        this.direct = isdirect;
+    }
+
+    encrypt(message = null, key = null) {
+        if (typeof (message) != 'string' || typeof (key) != 'string') {
+            throw new Error('Incorrect arguments!');
+        }
+        let messageArr = message.split('');
+        let keyArr = key.split('');
+        let keyPosition = 0;
+        const newArr = messageArr.map(el => {
+            if (el.toUpperCase().charCodeAt(0) >= 65 && el.toUpperCase().charCodeAt(0) <= 90) {
+                const keyShift = keyArr[keyPosition].toUpperCase().charCodeAt(0) - 65;
+                const startLetterPosition = el.toUpperCase().charCodeAt(0);
+                const pottentialPosition = startLetterPosition + keyShift;
+                const finishLetterPosition = pottentialPosition <= 90 ? pottentialPosition : 64 + (pottentialPosition % 90);
+                keyPosition = keyPosition + 1 >= keyArr.length ? 0 : ++keyPosition;
+                return String.fromCharCode(finishLetterPosition);
+            } else {
+                return el;
+            }
+        });
+        return this.direct ? newArr.join('') : newArr.reverse().join('');
+    }
+    decrypt(encryptedMessage, key) {
+        if (typeof (encryptedMessage) != 'string' || typeof (key) != 'string') {
+            throw new Error('Incorrect arguments!');
+        }
+        let messageArr = encryptedMessage.split('');
+        let keyArr = key.split('');
+        let keyPosition = 0;
+        const newArr = messageArr.map(el => {
+            if (el.toUpperCase().charCodeAt(0) >= 65 && el.toUpperCase().charCodeAt(0) <= 90) {
+                const keyShift = keyArr[keyPosition].toUpperCase().charCodeAt(0) - 65;
+                const startLetterPosition = el.toUpperCase().charCodeAt(0);
+                const pottentialPosition = startLetterPosition - keyShift;
+                const finishLetterPosition = pottentialPosition >= 65 ? pottentialPosition : 90 - (64 - pottentialPosition);
+                keyPosition = keyPosition + 1 >= keyArr.length ? 0 : ++keyPosition;
+                return String.fromCharCode(finishLetterPosition);
+            } else {
+                return el;
+            }
+        });
+        return this.direct ? newArr.join('') : newArr.reverse().join('');
+    }
 }
 
 module.exports = {
